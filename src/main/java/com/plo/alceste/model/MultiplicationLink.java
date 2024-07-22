@@ -6,6 +6,6 @@ import lombok.Data;
 public final class MultiplicationLink extends Vertex {
 
     private final Vertex source;
-    private final Vertex target;
+    private final Vertex destination;
     private final LargeValue ratio;
 }
