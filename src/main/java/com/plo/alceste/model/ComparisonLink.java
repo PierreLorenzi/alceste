@@ -5,7 +5,7 @@ import lombok.experimental.SuperBuilder;
 
 @Data
 @SuperBuilder
-public final class MultiplicationLink extends Vertex {
+public final class ComparisonLink extends Vertex {
 
     private final Vertex source;
     private final Vertex destination;

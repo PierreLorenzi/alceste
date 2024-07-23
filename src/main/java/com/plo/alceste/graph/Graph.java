@@ -1,6 +1,6 @@
 package com.plo.alceste.graph;
 
-import com.plo.alceste.model.MultiplicationLink;
+import com.plo.alceste.model.ComparisonLink;
 import com.plo.alceste.model.Vertex;
 
 import java.util.ArrayList;
@@ -16,10 +16,10 @@ public record Graph(List<Vertex> vertices) {
         return new GraphBuilder();
     }
 
-    public MultiplicationLink findLoopAround(Vertex vertex) {
-        List<MultiplicationLink> loops = vertices.stream()
-                .filter(v -> v instanceof MultiplicationLink)
-                .map(v -> (MultiplicationLink) v)
+    public ComparisonLink findLoopAround(Vertex vertex) {
+        List<ComparisonLink> loops = vertices.stream()
+                .filter(v -> v instanceof ComparisonLink)
+                .map(v -> (ComparisonLink) v)
                 .filter(link -> link.getSource() == vertex && link.getDestination() == vertex)
                 .toList();
         return switch (loops.size()) {
