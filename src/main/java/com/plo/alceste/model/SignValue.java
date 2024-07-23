@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public final class SignValue extends GraphElement implements Vertex {
+public final class SignValue implements Vertex {
 
     @Builder.Default
     private Sign sign = Sign.POSITIVE;

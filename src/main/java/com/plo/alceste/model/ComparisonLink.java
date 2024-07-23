@@ -8,8 +8,8 @@ import lombok.Data;
 @Builder
 public final class ComparisonLink extends GraphElement {
 
-    private final GraphElement source;
-    private final GraphElement destination;
+    private final Vertex source;
+    private final Vertex destination;
     private final ProportionValue proportion;
     private final SignValue sign;
 
