@@ -1,12 +1,11 @@
 package com.plo.alceste.model;
 
-import lombok.experimental.SuperBuilder;
+import lombok.Builder;
+import lombok.Data;
 
-@SuperBuilder
-public final class Object extends Vertex {
+@Data
+@Builder
+public final class Object extends GraphElement implements Vertex {
 
-    @Override
-    public String toString() {
-        return "\"" + getName() + "\"";
-    }
+    private final String name;
 }

@@ -1,18 +1,20 @@
 package com.plo.alceste.model;
 
+import com.plo.alceste.model.value.Sign;
+import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.SuperBuilder;
 
 @Data
-@SuperBuilder
-public final class ComparisonLink extends Vertex {
+@Builder
+public final class ComparisonLink extends GraphElement {
 
-    private final Vertex source;
-    private final Vertex destination;
-    private final LargeValue ratio;
+    private final GraphElement source;
+    private final GraphElement destination;
+    private final ProportionValue proportion;
+    private final SignValue sign;
 
-    @Override
-    public String toString() {
-        return destination + " = " + ratio + " * " + source;
-    }
+    private final ComparisonVertex positiveVertex = new ComparisonVertex(this, Sign.POSITIVE);
+    private final ComparisonVertex negativeVertex = new ComparisonVertex(this, Sign.NEGATIVE);
+
+    public record ComparisonVertex(ComparisonLink link, Sign sign) implements Vertex {}
 }

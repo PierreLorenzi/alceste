@@ -1,18 +1,13 @@
 package com.plo.alceste.model;
 
+import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.SuperBuilder;
 
 @Data
-@SuperBuilder
-public final class DependencyLink extends Vertex {
+@Builder
+public final class DependencyLink extends GraphElement implements Vertex {
 
     private final Vertex source;
     private final Vertex destination;
-    private final SmallValue probability;
-
-    @Override
-    public String toString() {
-        return source + " -> " + destination;
-    }
+    private final ProportionValue probability;
 }

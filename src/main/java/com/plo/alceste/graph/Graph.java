@@ -1,12 +1,13 @@
 package com.plo.alceste.graph;
 
 import com.plo.alceste.model.ComparisonLink;
+import com.plo.alceste.model.GraphElement;
 import com.plo.alceste.model.Vertex;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record Graph(List<Vertex> vertices) {
+public record Graph(List<GraphElement> elements) {
 
     public Graph() {
         this(new ArrayList<>());
@@ -17,9 +18,9 @@ public record Graph(List<Vertex> vertices) {
     }
 
     public ComparisonLink findLoopAround(Vertex vertex) {
-        List<ComparisonLink> loops = vertices.stream()
-                .filter(v -> v instanceof ComparisonLink)
-                .map(v -> (ComparisonLink) v)
+        List<ComparisonLink> loops = elements.stream()
+                .filter(e -> e instanceof ComparisonLink)
+                .map(e -> (ComparisonLink) e)
                 .filter(link -> link.getSource() == vertex && link.getDestination() == vertex)
                 .toList();
         return switch (loops.size()) {
