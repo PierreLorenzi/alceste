@@ -9,5 +9,8 @@ public final class DependencyLink extends GraphElement implements Vertex {
 
     private final Vertex source;
     private final Vertex destination;
-    private final ProportionValue probability;
+    @Builder.Default
+    private final Proportion probability = new Proportion(1.0);
+
+    public record Proportion(double value) implements Vertex {}
 }

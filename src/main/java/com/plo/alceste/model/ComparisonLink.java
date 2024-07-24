@@ -1,6 +1,5 @@
 package com.plo.alceste.model;
 
-import com.plo.alceste.model.value.Sign;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,11 +9,16 @@ public final class ComparisonLink extends GraphElement {
 
     private final Vertex source;
     private final Vertex destination;
-    private final ProportionValue proportion;
-    private final SignValue sign;
+    private final double proportion;
+    private final Sign sign;
 
-    private final ComparisonVertex positiveVertex = new ComparisonVertex(this, Sign.POSITIVE);
-    private final ComparisonVertex negativeVertex = new ComparisonVertex(this, Sign.NEGATIVE);
+    public record DirectVertex(ComparisonLink link) implements Vertex {}
+    public record IndirectVertex(ComparisonLink link) implements Vertex {}
+    public record DirectValue(ComparisonLink link) implements Vertex {}
+    public record IndirectValue(ComparisonLink link) implements Vertex {}
 
-    public record ComparisonVertex(ComparisonLink link, Sign sign) implements Vertex {}
+    public enum Sign {
+        POSITIVE,
+        NEGATIVE;
+    }
 }
