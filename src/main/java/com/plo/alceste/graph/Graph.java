@@ -13,10 +13,6 @@ public record Graph(List<GraphElement> elements) {
         this(new ArrayList<>());
     }
 
-    public static GraphBuilder builder() {
-        return new GraphBuilder();
-    }
-
     public ComparisonLink findLoopAround(Vertex vertex) {
         List<ComparisonLink> loops = elements.stream()
                 .filter(e -> e instanceof ComparisonLink)
@@ -28,5 +24,15 @@ public record Graph(List<GraphElement> elements) {
             case 1 -> loops.get(0);
             default -> throw new RuntimeException("There are multiple loops: " + loops);
         };
+    }
+
+    public enum Relationship {
+        DEPENDENCY,
+        PORTION,
+        IDENTIFICATION,
+        COMPARISON,
+        CONFORMATION,
+        COLLECTION,
+        DEFINITION,
     }
 }
