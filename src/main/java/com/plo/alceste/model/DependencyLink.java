@@ -5,9 +5,9 @@ import lombok.Data;
 
 @Data
 @Builder
-public final class DependencyLink extends GraphElement implements Vertex {
+public final class DependencyLink extends GraphElement implements Vertex, Link {
 
-    private final Vertex source;
+    private final Vertex origin;
     private final Vertex destination;
     @Builder.Default
     private final Proportion probability = new Proportion(1.0);
