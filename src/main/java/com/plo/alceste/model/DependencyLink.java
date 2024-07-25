@@ -5,12 +5,13 @@ import lombok.Data;
 
 @Data
 @Builder
-public final class DependencyLink extends GraphElement implements Vertex, Link {
+public final class DependencyLink extends GraphElement implements Link {
 
     private final Vertex origin;
     private final Vertex destination;
     @Builder.Default
-    private final Proportion probability = new Proportion(1.0);
+    private final double probability = 1.0;
 
-    public record Proportion(double value) implements Vertex {}
+    public record LinkVertex(DependencyLink link) implements Vertex {}
+    public record ValueVertex(DependencyLink link) implements Vertex {}
 }
