@@ -16,9 +16,9 @@ public record Graph(List<GraphElement> elements) {
 
         Dependency dependency = findDependencyBetween(v1, v2);
         List<ComparisonLink> comparisonLinks = findComparisonsBetween(v1, v2);
-        List<ComparisonLink> loops1 = findLoops(v1);
-        List<ComparisonLink> loops2 = findLoops(v2);
-
+        ComparisonLink loop1 = findMainLoop(v1);
+        ComparisonLink loop2 = findMainLoop(v2);
+        // Wait, a relationship between the definitions can be in a sub-loop, or sub-identity
 
     }
 
@@ -35,13 +35,17 @@ public record Graph(List<GraphElement> elements) {
     }
 
     private boolean isAncestor(Vertex possibleAncestor, Vertex possibleDescendant) {
-        Stream<Vertex> ancestors = Stream.iterate(possibleDescendant, this::findParent);
+        Stream<Vertex> ancestors = streamAncestors(possibleDescendant);
         return ancestors.anyMatch(ancestor -> ancestor == possibleAncestor);
+    }
+
+    private Stream<Vertex> streamAncestors(Vertex possibleDescendant) {
+        return Stream.iterate(possibleDescendant, this::findParent);
     }
 
     private Vertex findParent(Vertex vertex) {
         List<DependencyLink> links = streamElements(DependencyLink.class)
-                .filter(l -> l.getDestination() == vertex && l.getProbability() == 1.0)
+                .filter(l -> l.getDestination() == vertex && computeProportion(l.getProbability()).isEqualTo(1.0))
                 .toList();
         return switch (links.size()) {
             case 0 -> null;
@@ -54,6 +58,47 @@ public record Graph(List<GraphElement> elements) {
         return elements.stream()
                 .filter(type::isInstance)
                 .map(type::cast);
+    }
+
+    private ValueWithCertainty computeProportion(Proportion proportion) {
+        if (proportion == null) {
+            return new ValueWithCertainty(1.0, null);
+        }
+        ComparisonLink mainLoop = findMainLoop(proportion);
+        if (mainLoop == null) {
+            return new ValueWithCertainty(proportion.getValue(), null);
+        }
+        ValueWithCertainty certainty = computeCertainty(mainLoop);
+        return new ValueWithCertainty(proportion.getValue(), certainty);
+    }
+
+    private ComparisonLink findMainLoop(Vertex vertex) {
+        List<ComparisonLink> loops = findLoops(vertex);
+        if (loops.isEmpty()) {
+            return null;
+        }
+        List<ComparisonLink.LinkVertex> loopVertices = loops.stream()
+                .map(ComparisonLink::forwardVertex)
+                .toList();
+        ComparisonLink.LinkVertex main = findMain(loopVertices);
+        return main.link();
+    }
+
+    private <T extends Vertex> T findMain(List<T> vertices) {
+        T vertex = vertices.get(0);
+        List<Vertex> ancestors = streamAncestors(vertex)
+                .filter(vertices::contains)
+                .toList();
+        return (T)ancestors.get(ancestors.size()-1);
+    }
+
+    private ValueWithCertainty computeCertainty(ComparisonLink loop) {
+        ComparisonLink mainLoop = findMainLoop(loop.forwardVertex());
+        if (mainLoop == null) {
+            return new ValueWithCertainty(loop.forwardValue(), null);
+        }
+        ValueWithCertainty certainty = computeCertainty(mainLoop);
+        return new ValueWithCertainty(loop.forwardValue(), certainty);
     }
 
     private boolean doesLinkHaveVertices(Link l, Vertex v1, Vertex v2) {
@@ -69,6 +114,14 @@ public record Graph(List<GraphElement> elements) {
 
     private List<ComparisonLink> findLoops(Vertex vertex) {
         return findComparisonsBetween(vertex, vertex);
+    }
+
+    private record ValueWithCertainty(double value, ValueWithCertainty certainty) {
+
+        public boolean isEqualTo(double value) {
+            return (certainty == null || certainty.isEqualTo(1.0))
+                    && value == this.value;
+        }
     }
 
     public record Dependency(Vertex parent, Vertex child) {}

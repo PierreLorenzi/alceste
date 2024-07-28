@@ -1,10 +1,10 @@
 package com.plo.alceste.model;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@Data
-@Builder
+@Getter
+@AllArgsConstructor
 public final class ComparisonLink extends GraphElement implements Link {
 
     private final Vertex origin;
@@ -26,5 +26,9 @@ public final class ComparisonLink extends GraphElement implements Link {
 
     public LinkVertex backwardVertex() {
         return new LinkVertex(this, Direction.BACKWARD);
+    }
+
+    public double forwardValue() {
+        return (sign == Sign.POSITIVE) ? proportion : 1.0/proportion;
     }
 }

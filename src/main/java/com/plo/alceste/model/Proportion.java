@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public final class Object extends GraphElement implements Vertex {
+public final class Proportion implements Vertex {
 
-    private final String name;
+    private final double value;
 }

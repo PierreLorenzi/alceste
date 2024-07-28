@@ -1,6 +1,6 @@
 package com.plo.alceste.model;
 
 public sealed interface Vertex permits Object,
-        DependencyLink.LinkVertex, DependencyLink.ValueVertex,
+        DependencyLink, Proportion,
         ComparisonLink.LinkVertex, ComparisonLink.ValueVertex {
 }

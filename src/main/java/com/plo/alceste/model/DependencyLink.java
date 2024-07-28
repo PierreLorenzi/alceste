@@ -1,17 +1,13 @@
 package com.plo.alceste.model;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@Data
-@Builder
-public final class DependencyLink extends GraphElement implements Link {
+@Getter
+@AllArgsConstructor
+public final class DependencyLink extends GraphElement implements Link, Vertex {
 
     private final Vertex origin;
     private final Vertex destination;
-    @Builder.Default
-    private final double probability = 1.0;
-
-    public record LinkVertex(DependencyLink link) implements Vertex {}
-    public record ValueVertex(DependencyLink link) implements Vertex {}
+    private final Proportion probability;
 }
