@@ -20,6 +20,7 @@ public record Graph(List<GraphElement> elements) {
         ComparisonLink loop2 = findMainLoop(v2);
         // Wait, a relationship between the definitions can be in a sub-loop, or sub-identity
 
+
     }
 
     private Dependency findDependencyBetween(Vertex v1, Vertex v2) {
@@ -60,16 +61,34 @@ public record Graph(List<GraphElement> elements) {
                 .map(type::cast);
     }
 
-    private ValueWithCertainty computeProportion(Proportion proportion) {
-        if (proportion == null) {
-            return new ValueWithCertainty(1.0, null);
+    private CertainValue<Double> computeProportion(ProportionValue proportionValue) {
+        if (proportionValue == null) {
+            return new CertainValue<>(1.0, null);
         }
-        ComparisonLink mainLoop = findMainLoop(proportion);
+        Ratio certainty = computeCertainty(proportionValue);
+        return new CertainValue<>(proportionValue.getValue(), certainty);
+    }
+
+    private Ratio computeCertainty(Vertex vertex) {
+        ComparisonLink mainLoop = findMainLoop(vertex);
         if (mainLoop == null) {
-            return new ValueWithCertainty(proportion.getValue(), null);
+            return null;
         }
-        ValueWithCertainty certainty = computeCertainty(mainLoop);
-        return new ValueWithCertainty(proportion.getValue(), certainty);
+        return computeRatio(mainLoop.getRatio());
+    }
+
+    private Ratio computeRatio(RatioValue ratioValue) {
+        CertainValue<Double> proportion = computeProportion(ratioValue == null ? null : ratioValue.getProportion());
+        CertainValue<Sign> sign = computeSign(ratioValue == null ? null : ratioValue.getSign());
+        return new Ratio(proportion, sign);
+    }
+
+    private CertainValue<Sign> computeSign(SignValue signValue) {
+        if (signValue == null) {
+            return new CertainValue<>(Sign.LESS, null);
+        }
+        Ratio certainty = computeCertainty(signValue);
+        return new CertainValue<>(signValue.getValue(), certainty);
     }
 
     private ComparisonLink findMainLoop(Vertex vertex) {
@@ -77,11 +96,7 @@ public record Graph(List<GraphElement> elements) {
         if (loops.isEmpty()) {
             return null;
         }
-        List<ComparisonLink.LinkVertex> loopVertices = loops.stream()
-                .map(ComparisonLink::forwardVertex)
-                .toList();
-        ComparisonLink.LinkVertex main = findMain(loopVertices);
-        return main.link();
+        return findMain(loops);
     }
 
     private <T extends Vertex> T findMain(List<T> vertices) {
@@ -90,15 +105,6 @@ public record Graph(List<GraphElement> elements) {
                 .filter(vertices::contains)
                 .toList();
         return (T)ancestors.get(ancestors.size()-1);
-    }
-
-    private ValueWithCertainty computeCertainty(ComparisonLink loop) {
-        ComparisonLink mainLoop = findMainLoop(loop.forwardVertex());
-        if (mainLoop == null) {
-            return new ValueWithCertainty(loop.forwardValue(), null);
-        }
-        ValueWithCertainty certainty = computeCertainty(mainLoop);
-        return new ValueWithCertainty(loop.forwardValue(), certainty);
     }
 
     private boolean doesLinkHaveVertices(Link l, Vertex v1, Vertex v2) {
@@ -116,11 +122,27 @@ public record Graph(List<GraphElement> elements) {
         return findComparisonsBetween(vertex, vertex);
     }
 
-    private record ValueWithCertainty(double value, ValueWithCertainty certainty) {
+    private record CertainValue<T>(T value, Ratio certainty) {
+
+        public boolean isEqualTo(T value) {
+            return this.value.equals(value) &&
+                    (certainty == null || certainty.isEqualTo(1.0));
+        }
+    }
+
+    private record Ratio(CertainValue<Double> proportion, CertainValue<Sign> sign) {
 
         public boolean isEqualTo(double value) {
-            return (certainty == null || certainty.isEqualTo(1.0))
-                    && value == this.value;
+            if (sign.isEqualTo(Sign.LESS)) {
+                return proportion.isEqualTo(value);
+            }
+            if (sign.isEqualTo(Sign.MORE)) {
+                return proportion.isEqualTo(1/value);
+            }
+            if (value == 1.0) {
+                return proportion().isEqualTo(1.0);
+            }
+            return false;
         }
     }
 
