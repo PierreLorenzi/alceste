@@ -9,5 +9,5 @@ public final class DependencyLink extends GraphElement implements Link, Vertex {
 
     private final Vertex origin;
     private final Vertex destination;
-    private final Proportion probability;
+    private final ProportionValue probability;
 }

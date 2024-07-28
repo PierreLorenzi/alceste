@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public final class Proportion implements Vertex {
+public final class SignValue implements Vertex {
 
-    private final double value;
+    private final Sign value;
 }
