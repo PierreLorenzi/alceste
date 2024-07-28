@@ -3,7 +3,9 @@ package com.plo.alceste.graph;
 import com.plo.alceste.model.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public record Graph(List<GraphElement> elements) {
@@ -36,23 +38,32 @@ public record Graph(List<GraphElement> elements) {
     }
 
     private boolean isAncestor(Vertex possibleAncestor, Vertex possibleDescendant) {
-        Stream<Vertex> ancestors = streamAncestors(possibleDescendant);
-        return ancestors.anyMatch(ancestor -> ancestor == possibleAncestor);
+        List<Vertex> ancestors = findAncestors(possibleDescendant);
+        return ancestors.contains(possibleAncestor);
     }
 
-    private Stream<Vertex> streamAncestors(Vertex possibleDescendant) {
-        return Stream.iterate(possibleDescendant, this::findParent);
+    private List<Vertex> findAncestors(Vertex vertex) {
+        List<Vertex> ancestors = new ArrayList<>();
+        List<Vertex> currentAncestors = List.of(vertex);
+        while (!currentAncestors.isEmpty()) {
+            currentAncestors = currentAncestors.stream()
+                    .map(this::findParents)
+                    .flatMap(List::stream)
+                    .toList();
+            for (Vertex currentAncestor: currentAncestors) {
+                if (!ancestors.contains(currentAncestor)) {
+                    ancestors.add(currentAncestor);
+                }
+            }
+        }
+        return ancestors;
     }
 
-    private Vertex findParent(Vertex vertex) {
-        List<DependencyLink> links = streamElements(DependencyLink.class)
+    private List<Vertex> findParents(Vertex vertex) {
+        return streamElements(DependencyLink.class)
                 .filter(l -> l.getDestination() == vertex && computeProportion(l.getProbability()).isEqualTo(1.0))
+                .map(DependencyLink::getOrigin)
                 .toList();
-        return switch (links.size()) {
-            case 0 -> null;
-            case 1 -> links.get(0).getOrigin();
-            default -> throw new RuntimeException("Vertex has multiple parents");
-        };
     }
 
     private <T extends GraphElement> Stream<T> streamElements(Class<T> type) {
@@ -101,7 +112,7 @@ public record Graph(List<GraphElement> elements) {
 
     private <T extends Vertex> T findMain(List<T> vertices) {
         T vertex = vertices.get(0);
-        List<Vertex> ancestors = streamAncestors(vertex)
+        List<Vertex> ancestors = streamAncestors(vertex) // TODO on peut garder le même algorithme
                 .filter(vertices::contains)
                 .toList();
         return (T)ancestors.get(ancestors.size()-1);
