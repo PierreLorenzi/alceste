@@ -3,9 +3,7 @@ package com.plo.alceste.graph;
 import com.plo.alceste.model.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 public record Graph(List<GraphElement> elements) {
@@ -17,9 +15,9 @@ public record Graph(List<GraphElement> elements) {
     public Relationship findRelationshipBetween(Vertex v1, Vertex v2) {
 
         Dependency dependency = findDependencyBetween(v1, v2);
-        List<ComparisonLink> comparisonLinks = findComparisonsBetween(v1, v2);
-        ComparisonLink loop1 = findMainLoop(v1);
-        ComparisonLink loop2 = findMainLoop(v2);
+        List<IntersectionLink> intersectionLinks = findIntersectionsBetween(v1, v2);
+        IntersectionLink loop1 = findMainLoop(v1);
+        IntersectionLink loop2 = findMainLoop(v2);
         // Wait, a relationship between the definitions can be in a sub-loop, or sub-identity
 
 
@@ -81,7 +79,7 @@ public record Graph(List<GraphElement> elements) {
     }
 
     private Ratio computeCertainty(Vertex vertex) {
-        ComparisonLink mainLoop = findMainLoop(vertex);
+        IntersectionLink mainLoop = findMainLoop(vertex);
         if (mainLoop == null) {
             return null;
         }
@@ -102,8 +100,8 @@ public record Graph(List<GraphElement> elements) {
         return new CertainValue<>(signValue.getValue(), certainty);
     }
 
-    private ComparisonLink findMainLoop(Vertex vertex) {
-        List<ComparisonLink> loops = findLoops(vertex);
+    private IntersectionLink findMainLoop(Vertex vertex) {
+        List<IntersectionLink> loops = findLoops(vertex);
         if (loops.isEmpty()) {
             return null;
         }
@@ -123,14 +121,14 @@ public record Graph(List<GraphElement> elements) {
                 || (l.getDestination() == v2 && l.getOrigin() == v1);
     }
 
-    private List<ComparisonLink> findComparisonsBetween(Vertex v1, Vertex v2) {
-        return streamElements(ComparisonLink.class)
+    private List<IntersectionLink> findIntersectionsBetween(Vertex v1, Vertex v2) {
+        return streamElements(IntersectionLink.class)
                 .filter(l -> doesLinkHaveVertices(l, v1, v2))
                 .toList();
     }
 
-    private List<ComparisonLink> findLoops(Vertex vertex) {
-        return findComparisonsBetween(vertex, vertex);
+    private List<IntersectionLink> findLoops(Vertex vertex) {
+        return findIntersectionsBetween(vertex, vertex);
     }
 
     private record CertainValue<T>(T value, Ratio certainty) {
@@ -162,8 +160,9 @@ public record Graph(List<GraphElement> elements) {
     public enum Relationship {
         DEPENDENCY,
         PORTION,
+        INTERSECTION,
         IDENTIFICATION,
-        COMPARISON,
+        INTERSECTION,
         CONFORMATION,
         COLLECTION,
         DEFINITION,

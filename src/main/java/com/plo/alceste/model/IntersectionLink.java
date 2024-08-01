@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public final class ComparisonLink extends GraphElement implements Link, Vertex {
+public final class IntersectionLink extends GraphElement implements Link, Vertex {
 
     private final Vertex origin;
     private final Vertex destination;
