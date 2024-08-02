@@ -10,4 +10,5 @@ public final class IntersectionLink extends GraphElement implements Link, Vertex
     private final Vertex origin;
     private final Vertex destination;
     private final RatioValue ratio;
+    private final RatioValue size;
 }
