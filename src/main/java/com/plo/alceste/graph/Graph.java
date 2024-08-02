@@ -3,6 +3,7 @@ package com.plo.alceste.graph;
 import com.plo.alceste.model.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -109,11 +110,16 @@ public record Graph(List<GraphElement> elements) {
     }
 
     private <T extends Vertex> T findMain(List<T> vertices) {
-        T vertex = vertices.get(0);
-        List<Vertex> ancestors = streamAncestors(vertex) // TODO on peut garder le même algorithme
-                .filter(vertices::contains)
-                .toList();
-        return (T)ancestors.get(ancestors.size()-1);
+        T currentVertex = vertices.get(0);
+        while (true) {
+            final T target = currentVertex;
+            currentVertex = vertices.stream()
+                    .filter(v -> findDependencyBetween(v, target) != null)
+                    .findFirst().orElse(null);
+            if (currentVertex == null) {
+                return target;
+            }
+        }
     }
 
     private boolean doesLinkHaveVertices(Link l, Vertex v1, Vertex v2) {
