@@ -1,7 +1,15 @@
 package com.plo.alceste.model;
 
-public interface Link {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    Vertex getOrigin();
-    Vertex getDestination();
+@Getter
+@AllArgsConstructor
+public final class Link extends GraphElement implements Vertex {
+
+    private final LinkType type;
+    private final Vertex origin;
+    private final Vertex destination;
+    private final RatioValue originValue;
+    private final RatioValue destinationValue;
 }
