@@ -6,6 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Règles métier :
+ * - la dépendance est purement arborescente. Une identité peut appartenir à plusieurs objets, mais pas
+ *  *      une sous-identité
+ * - entre deux objets, il n'y a pas plus d'un lien d'intersection et un lien de corrélation. Il peut y avoir les deux.
+ * - conformation : un lien d'intersection 1 définitoire, avec une corrélation
+ */
 public record Graph(List<GraphElement> elements) {
 
     public Graph() {
@@ -15,7 +22,8 @@ public record Graph(List<GraphElement> elements) {
     public Relationship findRelationshipBetween(Vertex v1, Vertex v2) {
 
         IndirectDependency dependency = findDependencyBetween(v1, v2);
-        List<Link> links = findLinksBetween(v1, v2);
+        Link intersectionLink = findLinkBetween(v1, v2, LinkType.INTERSECTION);
+        Link correlationLink = findLinkBetween(v1, v2, LinkType.CORRELATION);
         List<Link> definitions1 = findDefinitions(v1);
         List<Link> definitions2 = findDefinitions(v2);
 
@@ -55,10 +63,11 @@ public record Graph(List<GraphElement> elements) {
                 .map(type::cast);
     }
 
-    private List<Link> findLinksBetween(Vertex v1, Vertex v2) {
+    private Link findLinkBetween(Vertex v1, Vertex v2, LinkType type) {
         return streamElements(Link.class)
                 .filter(l -> doesLinkHaveVertices(l, v1, v2))
-                .toList();
+                .filter(l -> l.getType() == type)
+                .findFirst().orElse(null);
     }
 
     private boolean doesLinkHaveVertices(Link l, Vertex v1, Vertex v2) {
@@ -67,7 +76,7 @@ public record Graph(List<GraphElement> elements) {
     }
 
     private List<Link> findDefinitions(Vertex vertex) {
-        return findLinksBetweenOfType(vertex, vertex, LinkType.COMPLIANCE);
+        return findLinksBetweenOfType(vertex, vertex, LinkType.CORRELATION);
     }
 
     private List<Link> findLinksBetweenOfType(Vertex v1, Vertex v2, LinkType type) {
@@ -84,7 +93,6 @@ public record Graph(List<GraphElement> elements) {
         PORTION,
         INTERSECTION,
         IDENTIFICATION,
-        INTERSECTION,
         CONFORMATION,
         COLLECTION,
         DEFINITION,
