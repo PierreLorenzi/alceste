@@ -8,10 +8,9 @@ import java.util.stream.Stream;
 
 /**
  * Règles métier :
- * - la dépendance est purement arborescente. Une identité peut appartenir à plusieurs objets, mais pas
- *  *      une sous-identité
  * - entre deux objets, il n'y a pas plus d'un lien d'intersection et un lien de corrélation. Il peut y avoir les deux.
  * - conformation : un lien d'intersection 1 définitoire, avec une corrélation
+ * - possession de phrase : à voir mais probablement avec une valeur 0+ ou une saturation 0
  */
 public record Graph(List<GraphElement> elements) {
 
@@ -21,40 +20,11 @@ public record Graph(List<GraphElement> elements) {
 
     public Relationship findRelationshipBetween(Vertex v1, Vertex v2) {
 
-        IndirectDependency dependency = findDependencyBetween(v1, v2);
         Link intersectionLink = findLinkBetween(v1, v2, LinkType.INTERSECTION);
         Link correlationLink = findLinkBetween(v1, v2, LinkType.CORRELATION);
         List<Link> definitions1 = findDefinitions(v1);
         List<Link> definitions2 = findDefinitions(v2);
 
-    }
-
-    private IndirectDependency findDependencyBetween(Vertex v1, Vertex v2) {
-        if (isAncestor(v1, v2)) {
-            return new IndirectDependency(v1, v2);
-        }
-        else if (isAncestor(v2, v1)) {
-            return new IndirectDependency(v2, v1);
-        }
-        else {
-            return null;
-        }
-    }
-
-    private boolean isAncestor(Vertex possibleAncestor, Vertex possibleDescendant) {
-        return streamAncestors(possibleDescendant)
-                .anyMatch(ancestor -> ancestor == possibleAncestor);
-    }
-
-    private Stream<Vertex> streamAncestors(Vertex vertex) {
-        return Stream.iterate(vertex, this::findParent);
-    }
-
-    private Vertex findParent(Vertex vertex) {
-        return streamElements(Dependency.class)
-                .filter(d -> d.getChild() == vertex)
-                .map(Dependency::getParent)
-                .findFirst().orElse(null);
     }
 
     private <T extends GraphElement> Stream<T> streamElements(Class<T> type) {
@@ -86,10 +56,7 @@ public record Graph(List<GraphElement> elements) {
                 .toList();
     }
 
-    private record IndirectDependency(Vertex ancestor, Vertex descendant) {}
-
     public enum Relationship {
-        DEPENDENCY,
         PORTION,
         INTERSECTION,
         IDENTIFICATION,
