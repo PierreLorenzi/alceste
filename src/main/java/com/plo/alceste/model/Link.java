@@ -10,6 +10,11 @@ public final class Link extends GraphElement implements Vertex {
     private final LinkType type;
     private final Vertex origin;
     private final Vertex destination;
-    private final RatioValue originValue;
-    private final RatioValue destinationValue;
+    private final RatioValue factor;
+    /**
+     * Pour une quantité : la quantité.
+     * Pour une portion : 1
+     * Pour une corrélation : la complexité
+     */
+    private final RatioValue size;
 }
